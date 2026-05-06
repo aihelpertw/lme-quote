@@ -849,17 +849,14 @@ async function saveQuote() {
 function openAddToPartsModal(name, partNo, p) {
   document.getElementById('atp_name').textContent = name;
   document.getElementById('atp_partno').textContent = partNo || '（未填料號）';
-  // 預填資料
-  document.getElementById('pt_name').value     = name;
-  document.getElementById('pt_no').value       = partNo;
-  document.getElementById('pt_mat').value      = 'C3771';
-  document.getElementById('pt_baseLME').value  = p.baseLME;
-  document.getElementById('pt_baseMat').value  = p.baseMat;
-  document.getElementById('pt_copperPct').value= Math.round(p.copperPct * 100);
-  document.getElementById('pt_defect').value   = Math.round(p.defect * 100 * 10) / 10;
-  document.getElementById('pt_pkg').value      = p.pkg;
-  document.getElementById('pt_labor').value    = p.labor;
-  document.getElementById('pt_time').value     = p.time;
+  document.getElementById('pt_mat').value       = 'C3771';
+  document.getElementById('pt_baseLME').value   = p.baseLME;
+  document.getElementById('pt_baseMat').value   = p.baseMat;
+  document.getElementById('pt_copperPct').value = Math.round(p.copperPct * 100);
+  document.getElementById('pt_defect').value    = Math.round(p.defect * 100 * 10) / 10;
+  document.getElementById('pt_pkg').value       = p.pkg;
+  document.getElementById('pt_labor').value     = p.labor;
+  document.getElementById('pt_time').value      = p.time;
   openModal('modal-addtoparts');
 }
 function clearQuoteForm() {
