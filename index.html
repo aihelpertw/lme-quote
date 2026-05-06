@@ -790,22 +790,6 @@ function calcQuote() {
 
   renderLmeTable();
 }
-  const md = document.getElementById('r_matdelta');
-  const matSign = matDelta >= 0 ? '+' : '';
-  md.textContent = `${matSign}${matDeltaPct.toFixed(1)}%  /  ${matSign}${fmt(matDelta)} 元`;
-  md.style.color = matDelta > 0.05 ? 'var(--red)' : matDelta < -0.05 ? 'var(--green)' : 'var(--text3)';
-
-  // 第二欄：報價
-  document.getElementById('r_basequote').textContent = fmt(base.twdQ) + ' NT$  /  ' + fmt(base.usdQ, 3) + ' USD';
-  document.getElementById('r_twd').textContent = fmt(cur.twdQ) + ' NT$';
-  document.getElementById('r_usd').textContent = fmt(cur.usdQ, 3) + ' USD';
-
-  const lp = document.getElementById('r_lmepct');
-  lp.textContent = (lmePct >= 0 ? '+' : '') + lmePct.toFixed(1) + '%';
-  lp.style.color = lmePct > 0.05 ? 'var(--red)' : lmePct < -0.05 ? 'var(--green)' : 'var(--text3)';
-
-  renderLmeTable();
-}
 async function saveQuote() {
   const name = document.getElementById('q_name').value.trim();
   if (!name) { toast('請填寫零件名稱'); return; }
