@@ -221,7 +221,7 @@ tr.base-row td { background: var(--blue-bg); }
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-title">LME 聯動<br>報價系統</div>
-    <div class="logo-sub">v1.1 · LME Linked Quotation</div>
+    <div class="logo-sub">v1.4 · LME Linked Quotation</div>
   </div>
   <nav class="nav">
     <button class="nav-item active" onclick="go('quote')">
@@ -239,10 +239,6 @@ tr.base-row td { background: var(--blue-bg); }
     <button class="nav-item" onclick="go('parts')">
       <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M6 1l1.5 1.5L9 1l1.5 1.5L12 1v4l-1.5 1.5L12 8v4l-1.5-1.5L9 12l-1.5-1.5L6 12V8l1.5-1.5L6 5V1z"/></svg>
       零件主檔
-    </button>
-    <button class="nav-item" onclick="go('lmetable')">
-      <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M1 14l3-5 3 3 3-7 4 9H1z"/></svg>
-      LME 對照表
     </button>
     <button class="nav-item" onclick="go('settings')">
       <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M7.4 1l-.5 2a5 5 0 00-1.3.7L3.5 3l-1.6 2.8 1.5 1.3a5 5 0 000 1.8L1.9 10.2 3.5 13l2.1-.7a5 5 0 001.3.7l.5 2h3.2l.5-2a5 5 0 001.3-.7l2.1.7 1.6-2.8-1.5-1.3a5 5 0 000-1.8l1.5-1.3L14.5 3l-2.1.7a5 5 0 00-1.3-.7L10.6 1H7.4zm1.6 4a3 3 0 110 6 3 3 0 010-6z"/></svg>
@@ -281,31 +277,52 @@ tr.base-row td { background: var(--blue-bg); }
   <div class="card">
     <div class="card-title">材料成本</div>
     <div class="grid2">
-      <div class="igroup"><label>基準 LME（USD/噸）</label><input type="number" id="q_baseLME" value="9500" step="100" oninput="calcQuote()"></div>
-      <div class="igroup"><label>當前 LME（USD/噸）</label><input type="number" id="q_curLME" value="12880" step="100" oninput="calcQuote()"></div>
-      <div class="igroup"><label>基準材料成本（元/件）</label><input type="number" id="q_baseMat" value="500" step="1" oninput="calcQuote()"></div>
-      <div class="igroup"><label>銅件佔材料成本（%）</label><input type="number" id="q_copperPct" value="40" step="1" min="1" max="100" oninput="calcQuote()"></div>
+      <div class="igroup"><label>基準 LME（USD/噸）</label><input type="number" id="q_baseLME" value="9500" step="100"></div>
+      <div class="igroup">
+        <label>當前 LME（USD/噸）</label>
+        <input type="number" id="q_curLME" value="12880" step="100">
+        <div style="margin-top:5px;font-size:11px;color:var(--text3);line-height:1.8;">
+          資料來源：
+          <a href="https://www.lme.com/metals/non-ferrous/lme-copper#Price+graphs" target="_blank" style="color:var(--blue);text-decoration:none;">LME 官網</a>
+          ・
+          <a href="https://tradingeconomics.com/commodity/copper" target="_blank" style="color:var(--blue);text-decoration:none;">Trading Economics（即時）</a>
+        </div>
+      </div>
+      <div class="igroup">
+        <label>基準材料成本（元/件）</label>
+        <input type="number" id="q_baseMat" value="500" step="1">
+        <div style="margin-top:5px;display:flex;gap:8px;align-items:center;">
+          <span style="font-size:12px;color:var(--text3);">基準詢價時間</span>
+          <input type="number" id="q_baseYear" placeholder="年" min="2000" max="2099" style="width:80px;padding:5px 8px;font-size:13px;border:0.5px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--text);outline:none;">
+          <input type="number" id="q_baseMonth" placeholder="月" min="1" max="12" style="width:60px;padding:5px 8px;font-size:13px;border:0.5px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--text);outline:none;">
+          <span style="font-size:11px;color:var(--text3);">（最後交易價）</span>
+        </div>
+      </div>
+      <div class="igroup"><label>銅件佔材料成本（%）</label><input type="number" id="q_copperPct" value="40" step="1" min="1" max="100"></div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-title">製造成本</div>
     <div class="grid2">
-      <div class="igroup"><label>不良率（%）</label><input type="number" id="q_defect" value="2" step="0.1" min="0" oninput="calcQuote()"></div>
-      <div class="igroup"><label>額外包裝費（元/件）</label><input type="number" id="q_pkg" value="0" step="1" min="0" oninput="calcQuote()"></div>
-      <div class="igroup"><label>人工費率（元/分鐘）</label><input type="number" id="q_labor" value="3" step="0.1" min="0" oninput="calcQuote()"></div>
-      <div class="igroup"><label>加工時間（分鐘）</label><input type="number" id="q_time" value="5" step="0.1" min="0" oninput="calcQuote()"></div>
+      <div class="igroup"><label>不良率（%）</label><input type="number" id="q_defect" value="2" step="0.1" min="0"></div>
+      <div class="igroup"><label>額外包裝費（元/件）</label><input type="number" id="q_pkg" value="0" step="1" min="0"></div>
+      <div class="igroup"><label>人工費率（元/分鐘）</label><input type="number" id="q_labor" value="3" step="0.1" min="0"></div>
+      <div class="igroup"><label>加工時間（分鐘）</label><input type="number" id="q_time" value="5" step="0.1" min="0"></div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-title">報價參數</div>
     <div class="grid3">
-      <div class="igroup"><label>管銷率（%）</label><input type="number" id="q_overhead" value="15" step="1" min="0" oninput="calcQuote()"></div>
-      <div class="igroup"><label>利潤率（%）</label><input type="number" id="q_profit" value="20" step="1" min="0" oninput="calcQuote()"></div>
-      <div class="igroup"><label>匯率（TWD/USD）</label><input type="number" id="q_fx" value="31.5" step="0.1" min="0.1" oninput="calcQuote()"></div>
+      <div class="igroup"><label>管銷率（%）</label><input type="number" id="q_overhead" value="15" step="1" min="0"></div>
+      <div class="igroup"><label>利潤率（%）</label><input type="number" id="q_profit" value="20" step="1" min="0"></div>
+      <div class="igroup"><label>匯率（TWD/USD）</label><input type="number" id="q_fx" value="31.5" step="0.1" min="0.1"></div>
     </div>
     <div class="igroup" style="margin-top:10px;"><label>備註</label><textarea id="q_note" placeholder="備註事項..."></textarea></div>
+    <div style="margin-top:14px;">
+      <button class="btn btn-primary" style="padding:10px 28px;font-size:15px;" onclick="calcQuote()">🔄 更新計算</button>
+    </div>
   </div>
 
   <div class="formula">
@@ -322,6 +339,30 @@ tr.base-row td { background: var(--blue-bg); }
     <div class="metric"><div class="metric-label">報價（USD）</div><div class="metric-value green" id="r_usd">—</div><div class="metric-sub">USD/件</div></div>
     <div class="metric"><div class="metric-label">LME 漲跌幅</div><div class="metric-value" id="r_lmepct">—</div><div class="metric-sub">相對基準</div></div>
     <div class="metric"><div class="metric-label">材料成本變動</div><div class="metric-value" id="r_matdelta">—</div><div class="metric-sub">元/件</div></div>
+  </div>
+
+  <div style="margin-top:8px;">
+    <div class="card-title" style="margin-bottom:10px;">LME 對照表</div>
+    <div class="lme-range no-print" style="margin-bottom:10px;">
+      <label>LME 起始</label>
+      <input type="number" id="lt_min" value="9000" step="500" oninput="renderLmeTable()">
+      <label>結束</label>
+      <input type="number" id="lt_max" value="15000" step="500" oninput="renderLmeTable()">
+      <button class="btn btn-sm" onclick="window.print()">列印</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>LME（USD/噸）</th><th>漲跌幅</th>
+          <th style="text-align:right">材料成本</th>
+          <th style="text-align:right">出廠價</th>
+          <th style="text-align:right">報價（TWD）</th>
+          <th style="text-align:right">報價（USD）</th>
+          <th style="text-align:right">vs 基準TWD</th>
+        </tr></thead>
+        <tbody id="lt_tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -394,34 +435,6 @@ tr.base-row td { background: var(--blue-bg); }
   </div>
 </div>
 
-<!-- ════════ LME 對照表 ════════ -->
-<div id="page-lmetable" class="page">
-  <div class="page-header">
-    <div class="page-title">LME 對照表</div>
-    <div class="page-sub">依當前報價參數，產生完整 LME 價格對照</div>
-  </div>
-  <div class="lme-range no-print">
-    <label>LME 起始</label>
-    <input type="number" id="lt_min" value="9000" step="500" oninput="renderLmeTable()">
-    <label>結束</label>
-    <input type="number" id="lt_max" value="15000" step="500" oninput="renderLmeTable()">
-    <button class="btn btn-sm" onclick="window.print()">列印</button>
-  </div>
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr>
-        <th>LME（USD/噸）</th><th>漲跌幅</th>
-        <th style="text-align:right">材料成本</th>
-        <th style="text-align:right">出廠價</th>
-        <th style="text-align:right">報價（TWD）</th>
-        <th style="text-align:right">報價（USD）</th>
-        <th style="text-align:right">vs 基準TWD</th>
-      </tr></thead>
-      <tbody id="lt_tbody"></tbody>
-    </table>
-  </div>
-</div>
-
 <!-- ════════ 設定 ════════ -->
 <div id="page-settings" class="page">
   <div class="page-header">
@@ -471,7 +484,7 @@ tr.base-row td { background: var(--blue-bg); }
 <!-- ════ MODALS ════ -->
 <div class="modal-bg" id="modal-addcustomer">
   <div class="modal">
-    <div class="modal-title">新增客戶</div>
+    <div class="modal-title" id="modal-customer-title">新增客戶</div>
     <div class="grid2" style="gap:12px;">
       <div class="igroup"><label>客戶名稱 *</label><input type="text" id="c_name" placeholder="公司名稱"></div>
       <div class="igroup"><label>聯絡人</label><input type="text" id="c_contact" placeholder="姓名"></div>
@@ -489,8 +502,8 @@ tr.base-row td { background: var(--blue-bg); }
     <div class="igroup" style="margin-top:10px;"><label>地址</label><input type="text" id="c_address" placeholder="公司地址"></div>
     <div class="igroup" style="margin-top:10px;"><label>備註</label><textarea id="c_note" placeholder="備註..."></textarea></div>
     <div class="modal-footer">
-      <button class="btn" onclick="closeModal('modal-addcustomer')">取消</button>
-      <button class="btn btn-primary" onclick="addCustomer()">儲存客戶</button>
+      <button class="btn" onclick="closeModal('modal-addcustomer');resetCustomerModal()">取消</button>
+      <button class="btn btn-primary" id="btn-save-customer" onclick="addCustomer()">儲存客戶</button>
     </div>
   </div>
 </div>
@@ -557,7 +570,12 @@ let defaults = JSON.parse(localStorage.getItem('lme_defaults') || '{}');
 // ══════════════════════════════════════════
 // UTILS
 // ══════════════════════════════════════════
-function fmt(n, d=1) {
+function fmtDate(d) {
+  if (!d) return '—';
+  const s = String(d);
+  // Handle both "2026-05-06 10:30" and "2026-05-06T03:00" formats
+  return s.replace('T', ' ').slice(0, 16);
+}
   if (n === null || n === undefined || isNaN(n)) return '—';
   return parseFloat(Number(n).toFixed(d)).toLocaleString('zh-TW', {minimumFractionDigits:d, maximumFractionDigits:d});
 }
@@ -570,7 +588,7 @@ function go(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  const pages = ['quote','history','customers','parts','lmetable','settings'];
+  const pages = ['quote','history','customers','parts','settings'];
   document.querySelectorAll('.nav-item')[pages.indexOf(page)]?.classList.add('active');
   if (page === 'history') loadHistory();
   if (page === 'customers') loadCustomers();
@@ -661,17 +679,19 @@ function applyDefaults() {
 // ══════════════════════════════════════════
 function getQuoteParams() {
   return {
-    baseLME:   parseFloat(document.getElementById('q_baseLME').value)   || 9500,
-    curLME:    parseFloat(document.getElementById('q_curLME').value)     || 12880,
-    baseMat:   parseFloat(document.getElementById('q_baseMat').value)    || 500,
-    copperPct: (parseFloat(document.getElementById('q_copperPct').value) || 40) / 100,
-    defect:    (parseFloat(document.getElementById('q_defect').value)    || 0) / 100,
-    pkg:       parseFloat(document.getElementById('q_pkg').value)        || 0,
-    labor:     parseFloat(document.getElementById('q_labor').value)      || 3,
-    time:      parseFloat(document.getElementById('q_time').value)       || 5,
-    overhead:  (parseFloat(document.getElementById('q_overhead').value)  || 15) / 100,
-    profit:    (parseFloat(document.getElementById('q_profit').value)    || 20) / 100,
-    fx:        parseFloat(document.getElementById('q_fx').value)         || 31.5,
+    baseLME:    parseFloat(document.getElementById('q_baseLME').value)   || 9500,
+    curLME:     parseFloat(document.getElementById('q_curLME').value)     || 12880,
+    baseMat:    parseFloat(document.getElementById('q_baseMat').value)    || 500,
+    baseYear:   document.getElementById('q_baseYear').value  || '',
+    baseMonth:  document.getElementById('q_baseMonth').value || '',
+    copperPct:  (parseFloat(document.getElementById('q_copperPct').value) || 40) / 100,
+    defect:     (parseFloat(document.getElementById('q_defect').value)    || 0) / 100,
+    pkg:        parseFloat(document.getElementById('q_pkg').value)        || 0,
+    labor:      parseFloat(document.getElementById('q_labor').value)      || 3,
+    time:       parseFloat(document.getElementById('q_time').value)       || 5,
+    overhead:   (parseFloat(document.getElementById('q_overhead').value)  || 15) / 100,
+    profit:     (parseFloat(document.getElementById('q_profit').value)    || 20) / 100,
+    fx:         parseFloat(document.getElementById('q_fx').value)         || 31.5,
   };
 }
 function compute(p, lme) {
@@ -705,6 +725,8 @@ function calcQuote() {
   const md = document.getElementById('r_matdelta');
   md.textContent = (matDelta >= 0 ? '+' : '') + fmt(matDelta) + ' 元';
   md.className = 'metric-value' + (matDelta > 0.05 ? ' up' : matDelta < -0.05 ? ' dn' : '');
+
+  renderLmeTable();
 }
 async function saveQuote() {
   const name = document.getElementById('q_name').value.trim();
@@ -727,7 +749,10 @@ async function saveQuote() {
     factoryPrice: parseFloat(cur.factory.toFixed(2)),
     twdQuote: parseFloat(cur.twdQ.toFixed(2)),
     usdQuote: parseFloat(cur.usdQ.toFixed(4)),
-    note: document.getElementById('q_note').value.trim()
+    note: [
+      (p.baseYear && p.baseMonth ? `基準詢價時間：${p.baseYear}年${p.baseMonth}月` : ''),
+      document.getElementById('q_note').value.trim()
+    ].filter(Boolean).join(' ／ ')
   };
   const r = await apiPost({ action: 'saveQuote', data });
   if (r && r.status === 'ok') {
@@ -772,7 +797,7 @@ function renderHistory(data) {
   }
   tbody.innerHTML = data.map(r => `
     <tr>
-      <td>${String(r.date).slice(0,16)}</td>
+      <td>${fmtDate(r.date)}</td>
       <td>${r.partName}</td>
       <td><span class="badge badge-blue">${r.partNo || '—'}</span></td>
       <td>${r.customerName || '—'}</td>
@@ -797,7 +822,7 @@ function showDetail(id) {
   document.getElementById('md_title').textContent = q.partName;
   document.getElementById('md_body').innerHTML = `
     <div class="grid2" style="gap:10px;margin-bottom:14px;">
-      <div class="metric"><div class="metric-label">報價日期</div><div class="metric-value" style="font-size:15px">${String(q.date).slice(0,16)}</div></div>
+      <div class="metric"><div class="metric-label">報價日期</div><div class="metric-value" style="font-size:15px">${fmtDate(q.date)}</div></div>
       <div class="metric"><div class="metric-label">客戶</div><div class="metric-value" style="font-size:15px">${q.customerName || '—'}</div></div>
     </div>
     <div class="grid4" style="gap:8px;margin-bottom:14px;">
@@ -869,6 +894,7 @@ function renderCustomers() {
       <td>${c.email || '—'}</td>
       <td><span class="badge badge-amber">${c.currency || 'TWD'}</span></td>
       <td>
+        <button class="btn btn-sm" onclick="editCustomer('${c.id}')">編輯</button>
         <button class="btn btn-sm btn-danger" onclick="delCustomer('${c.id}')">刪除</button>
       </td>
     </tr>`).join('');
@@ -900,6 +926,51 @@ async function delCustomer(id) {
   if (!confirm('確認刪除此客戶？')) return;
   const r = await apiGet({ action: 'deleteCustomer', customerId: id });
   if (r && r.status === 'ok') { toast('已刪除'); loadCustomers(); }
+}
+
+function editCustomer(id) {
+  const c = customers.find(x => x.id === id);
+  if (!c) return;
+  // 填入現有資料
+  document.getElementById('c_name').value    = c.name || '';
+  document.getElementById('c_contact').value = c.contact || '';
+  document.getElementById('c_phone').value   = c.phone || '';
+  document.getElementById('c_email').value   = c.email || '';
+  document.getElementById('c_address').value = c.address || '';
+  document.getElementById('c_currency').value = c.currency || 'TWD';
+  document.getElementById('c_note').value    = c.note || '';
+  // 切換 modal 標題和按鈕為編輯模式
+  document.getElementById('modal-customer-title').textContent = '編輯客戶';
+  document.getElementById('btn-save-customer').textContent = '更新客戶';
+  document.getElementById('btn-save-customer').onclick = () => updateCustomer(id);
+  openModal('modal-addcustomer');
+}
+
+async function updateCustomer(id) {
+  const name = document.getElementById('c_name').value.trim();
+  if (!name) { toast('請填寫客戶名稱'); return; }
+  const r = await apiPost({ action: 'updateCustomer', data: {
+    id,
+    name, contact: document.getElementById('c_contact').value,
+    phone: document.getElementById('c_phone').value,
+    email: document.getElementById('c_email').value,
+    address: document.getElementById('c_address').value,
+    currency: document.getElementById('c_currency').value,
+    note: document.getElementById('c_note').value,
+  }});
+  if (r && r.status === 'ok') {
+    toast('客戶資料已更新');
+    closeModal('modal-addcustomer');
+    resetCustomerModal();
+    loadCustomers();
+  }
+}
+
+function resetCustomerModal() {
+  document.getElementById('modal-customer-title').textContent = '新增客戶';
+  document.getElementById('btn-save-customer').textContent = '儲存客戶';
+  document.getElementById('btn-save-customer').onclick = addCustomer;
+  ['c_name','c_contact','c_phone','c_email','c_address','c_note'].forEach(id => document.getElementById(id).value = '');
 }
 
 // ══════════════════════════════════════════
