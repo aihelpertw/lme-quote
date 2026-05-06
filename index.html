@@ -598,11 +598,10 @@ async function apiGet(params) {
 async function apiPost(body) {
   if (!API_URL) { toast('請先在「設定」頁填入 API 網址'); return null; }
   try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(body)
-    });
+    // Use GET with encoded data to avoid CORS preflight issues
+    const encoded = encodeURIComponent(JSON.stringify(body));
+    const url = API_URL + '?postData=' + encoded + '&action=' + body.action;
+    const res = await fetch(url);
     return await res.json();
   } catch(e) { toast('API 連線失敗：' + e.message); return null; }
 }
