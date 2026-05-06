@@ -573,9 +573,9 @@ let defaults = JSON.parse(localStorage.getItem('lme_defaults') || '{}');
 function fmtDate(d) {
   if (!d) return '—';
   const s = String(d);
-  // Handle both "2026-05-06 10:30" and "2026-05-06T03:00" formats
   return s.replace('T', ' ').slice(0, 16);
 }
+function fmt(n, d=1) {
   if (n === null || n === undefined || isNaN(n)) return '—';
   return parseFloat(Number(n).toFixed(d)).toLocaleString('zh-TW', {minimumFractionDigits:d, maximumFractionDigits:d});
 }
