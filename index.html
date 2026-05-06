@@ -1,86 +1,1246 @@
-LME 聯動
-報價系統
-v1.6 · LME Linked Quotation
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LME 聯動報價系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --border: rgba(0,0,0,0.10);
+  --border2: rgba(0,0,0,0.18);
+  --text: #1a1917;
+  --text2: #6b6760;
+  --text3: #9e9b96;
+  --blue: #185FA5;
+  --blue-bg: #e8f0fb;
+  --green: #0f6e56;
+  --green-bg: #e6f4f0;
+  --red: #a32d2d;
+  --red-bg: #fdf0f0;
+  --amber: #854f0b;
+  --amber-bg: #fef3e2;
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+/* ── LAYOUT ── */
+.app { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--text);
+  display: flex; flex-direction: column;
+  padding: 0;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 100;
+}
+.logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.logo-title {
+  font-size: 13px; font-weight: 700; color: #fff;
+  letter-spacing: 0.04em; line-height: 1.3;
+}
+.logo-sub { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 3px; font-family: 'JetBrains Mono'; }
+.nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 8px;
+  font-size: 13px; color: rgba(255,255,255,0.6);
+  cursor: pointer; transition: all 0.15s;
+  border: none; background: none; text-align: left; width: 100%;
+}
+.nav-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); }
+.nav-item.active { background: var(--blue); color: #fff; }
+.nav-icon { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.8; }
+.sidebar-footer {
+  padding: 14px 16px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 11px; color: rgba(255,255,255,0.3);
+  font-family: 'JetBrains Mono';
+}
+.main { margin-left: 220px; flex: 1; padding: 28px 32px; }
+.page { display: none; }
+.page.active { display: block; }
+/* ── COMPONENTS ── */
+.page-header { margin-bottom: 24px; }
+.page-title { font-size: 22px; font-weight: 700; color: var(--text); }
+.page-sub { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.card {
+  background: var(--surface); border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 16px;
+}
+.card-title {
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px;
+}
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.grid4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.igroup { display: flex; flex-direction: column; gap: 5px; }
+.igroup label { font-size: 12px; color: var(--text2); font-weight: 500; }
+.igroup input, .igroup select, .igroup textarea {
+  padding: 8px 11px; font-size: 14px; font-family: inherit;
+  border: 0.5px solid var(--border2); border-radius: 8px;
+  background: var(--surface); color: var(--text); outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.igroup input:focus, .igroup select:focus, .igroup textarea:focus {
+  border-color: var(--blue); box-shadow: 0 0 0 3px rgba(24,95,165,0.12);
+}
+.igroup textarea { resize: vertical; min-height: 70px; }
+/* ── METRIC CARDS ── */
+.metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+.metric { background: var(--surface2); border-radius: var(--radius); padding: 12px 16px; }
+.metric-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.metric-value { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.2; }
+.metric-value.blue { color: var(--blue); font-size: 24px; }
+.metric-value.green { color: var(--green); }
+.metric-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+/* ── BUTTONS ── */
+.btn-row { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; font-size: 13px; font-weight: 500; font-family: inherit;
+  border: 0.5px solid var(--border2); border-radius: 8px;
+  background: var(--surface); color: var(--text);
+  cursor: pointer; transition: all 0.12s; white-space: nowrap;
+}
+.btn:hover { background: var(--surface2); }
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.btn-primary:hover { background: #0c4480; }
+.btn-green { background: var(--green); color: #fff; border-color: var(--green); }
+.btn-green:hover { background: #085040; }
+.btn-danger { color: var(--red); border-color: rgba(163,45,45,0.3); }
+.btn-danger:hover { background: var(--red-bg); }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+.btn-icon { padding: 6px 10px; }
+/* ── TABLE ── */
+.tbl-wrap { border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  background: var(--surface2); color: var(--text2); font-weight: 600;
+  padding: 9px 12px; text-align: left; font-size: 11px;
+  border-bottom: 0.5px solid var(--border);
+}
+tbody td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); color: var(--text); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--surface2); }
+td.num { text-align: right; font-family: 'JetBrains Mono'; font-size: 12px; }
+td.up { color: var(--red); font-weight: 500; }
+td.dn { color: var(--green); font-weight: 500; }
+tr.base-row td { background: var(--blue-bg); }
+/* ── TAGS / BADGES ── */
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+}
+.badge-blue { background: var(--blue-bg); color: var(--blue); }
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-red { background: var(--red-bg); color: var(--red); }
+.badge-amber { background: var(--amber-bg); color: var(--amber); }
+/* ── MODAL ── */
+.modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 200;
+  align-items: center; justify-content: center;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--surface); border-radius: var(--radius-lg);
+  padding: 24px 28px; width: 560px; max-width: 96vw;
+  max-height: 92vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 18px; }
+.modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+/* ── SEARCH ── */
+.search-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+.search-box {
+  flex: 1; padding: 8px 12px; font-size: 14px; font-family: inherit;
+  border: 0.5px solid var(--border2); border-radius: 8px;
+  background: var(--surface); color: var(--text); outline: none;
+}
+.search-box:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(24,95,165,0.12); }
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: #1a1917; color: #fff; padding: 10px 18px;
+  border-radius: 8px; font-size: 13px; z-index: 999;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.2s; pointer-events: none;
+}
+#toast.show { opacity: 1; transform: none; }
+/* ── EMPTY STATE ── */
+.empty { text-align: center; padding: 48px 20px; color: var(--text3); }
+.empty-icon { font-size: 36px; margin-bottom: 10px; }
+.empty-text { font-size: 14px; }
+/* ── FORMULA BOX ── */
+.formula {
+  font-family: 'JetBrains Mono'; font-size: 12px;
+  background: var(--surface2); border-radius: 8px;
+  padding: 10px 14px; margin-bottom: 10px; color: var(--text2);
+  line-height: 1.8;
+}
+.formula strong { color: var(--text); }
+/* ── DIVIDER ── */
+.div { border: none; border-top: 0.5px solid var(--border); margin: 16px 0; }
+/* ── API CONFIG ── */
+.api-status { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; }
+.dot.ok { background: #1d9e75; }
+.dot.err { background: #e24b4a; }
+/* ── LME TABLE ── */
+.lme-range { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.lme-range label { font-size: 12px; color: var(--text2); }
+.lme-range input { width: 110px; padding: 6px 10px; font-size: 13px; font-family: 'JetBrains Mono'; border: 0.5px solid var(--border2); border-radius: 7px; background: var(--surface); color: var(--text); outline: none; }
+/* ── PRINT ── */
+@media print {
+  .sidebar, .btn-row, .search-row, .no-print { display: none !important; }
+  .main { margin-left: 0; padding: 0; }
+  body { background: white; }
+}
+</style>
+</head>
+<body>
 
-報價計算
+<div class="app">
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-title">LME 聯動<br>報價系統</div>
+    <div class="logo-sub">v1.6 · LME Linked Quotation</div>
+  </div>
+  <nav class="nav">
+    <button class="nav-item active" onclick="go('quote')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v1H2zm0 3h12v1H2zm0 3h8v1H2zm0 3h6v1H2z"/><path d="M11 9l4 4-4 4v-2.5H7v-3h4z"/></svg>
+      報價計算
+    </button>
+    <button class="nav-item" onclick="go('history')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zM0 8a8 8 0 1116 0A8 8 0 010 8z"/><path d="M7.5 4.5V8l3 1.5-.5 1L6.5 8V4.5h1z"/></svg>
+      報價歷史
+    </button>
+    <button class="nav-item" onclick="go('customers')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm0 1c-3.31 0-6 1.79-6 4v1h12v-1c0-2.21-2.69-4-6-4z"/></svg>
+      客戶管理
+    </button>
+    <button class="nav-item" onclick="go('parts')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M6 1l1.5 1.5L9 1l1.5 1.5L12 1v4l-1.5 1.5L12 8v4l-1.5-1.5L9 12l-1.5-1.5L6 12V8l1.5-1.5L6 5V1z"/></svg>
+      零件主檔
+    </button>
+    <button class="nav-item" onclick="go('settings')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M7.4 1l-.5 2a5 5 0 00-1.3.7L3.5 3l-1.6 2.8 1.5 1.3a5 5 0 000 1.8L1.9 10.2 3.5 13l2.1-.7a5 5 0 001.3.7l.5 2h3.2l.5-2a5 5 0 001.3-.7l2.1.7 1.6-2.8-1.5-1.3a5 5 0 000-1.8l1.5-1.3L14.5 3l-2.1.7a5 5 0 00-1.3-.7L10.6 1H7.4zm1.6 4a3 3 0 110 6 3 3 0 010-6z"/></svg>
+      設定
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="api-status">
+      <div class="dot" id="apiDot"></div>
+      <span id="apiStatusText">未連線</span>
+    </div>
+  </div>
+</aside>
 
-報價歷史
+<!-- ── MAIN ── -->
+<main class="main">
 
-客戶管理
+<!-- ════════ 報價計算 ════════ -->
+<div id="page-quote" class="page active">
+  <div class="page-header">
+    <div class="page-title">報價計算</div>
+    <div class="page-sub">填入參數，計算完成後可存入報價紀錄</div>
+  </div>
 
-零件主檔
+  <div class="btn-row no-print">
+    <input type="text" id="q_name" placeholder="零件名稱（必填）" style="flex:1;padding:8px 12px;font-size:14px;font-family:inherit;border:0.5px solid var(--border2);border-radius:8px;background:var(--surface);color:var(--text);outline:none;">
+    <input type="text" id="q_partno" placeholder="料號（選填）" style="width:140px;padding:8px 12px;font-size:14px;font-family:inherit;border:0.5px solid var(--border2);border-radius:8px;background:var(--surface);color:var(--text);outline:none;">
+    <select id="q_customer" style="width:180px;padding:8px 12px;font-size:13px;font-family:inherit;border:0.5px solid var(--border2);border-radius:8px;background:var(--surface);color:var(--text);outline:none;">
+      <option value="">選擇客戶</option>
+    </select>
+    <button class="btn btn-primary" onclick="saveQuote()">儲存報價</button>
+    <button class="btn" onclick="loadFromPart()">載入零件</button>
+    <button class="btn" onclick="clearQuoteForm()">清除</button>
+  </div>
 
-設定
+  <div class="card">
+    <div class="card-title">材料成本</div>
+    <div class="grid2">
+      <div class="igroup"><label>基準 LME（USD/噸）</label><input type="number" id="q_baseLME" value="9500" step="100"></div>
+      <div class="igroup">
+        <label>當前 LME（USD/噸）</label>
+        <input type="number" id="q_curLME" value="12880" step="100">
+        <div style="margin-top:5px;font-size:11px;color:var(--text3);line-height:1.8;">
+          資料來源：
+          <a href="https://www.lme.com/metals/non-ferrous/lme-copper#Price+graphs" target="_blank" style="color:var(--blue);text-decoration:none;">LME 官網</a>
+          ・
+          <a href="https://tradingeconomics.com/commodity/copper" target="_blank" style="color:var(--blue);text-decoration:none;">Trading Economics（即時）</a>
+        </div>
+      </div>
+      <div class="igroup">
+        <label>基準材料成本（元/件）</label>
+        <input type="number" id="q_baseMat" value="500" step="1">
+        <div style="margin-top:5px;display:flex;gap:8px;align-items:center;">
+          <span style="font-size:12px;color:var(--text3);">基準詢價時間</span>
+          <input type="number" id="q_baseYear" placeholder="年" min="2000" max="2099" style="width:80px;padding:5px 8px;font-size:13px;border:0.5px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--text);outline:none;">
+          <input type="number" id="q_baseMonth" placeholder="月" min="1" max="12" style="width:60px;padding:5px 8px;font-size:13px;border:0.5px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--text);outline:none;">
+          <span style="font-size:11px;color:var(--text3);">（最後交易價）</span>
+        </div>
+      </div>
+      <div class="igroup"><label>銅件佔材料成本（%）</label><input type="number" id="q_copperPct" value="40" step="1" min="1" max="100"></div>
+    </div>
+  </div>
 
-未連線
-報價計算
-填入參數，計算完成後可存入報價紀錄
+  <div class="card">
+    <div class="card-title">製造成本</div>
+    <div class="grid2">
+      <div class="igroup"><label>不良率（%）</label><input type="number" id="q_defect" value="2" step="0.1" min="0"></div>
+      <div class="igroup"><label>額外包裝費（元/件）</label><input type="number" id="q_pkg" value="0" step="1" min="0"></div>
+      <div class="igroup"><label>人工費率（元/分鐘）</label><input type="number" id="q_labor" value="3" step="0.1" min="0"></div>
+      <div class="igroup"><label>加工時間（分鐘）</label><input type="number" id="q_time" value="5" step="0.1" min="0"></div>
+    </div>
+  </div>
 
+  <div class="card">
+    <div class="card-title">報價參數</div>
+    <div class="grid3">
+      <div class="igroup"><label>管銷率（%）</label><input type="number" id="q_overhead" value="15" step="1" min="0"></div>
+      <div class="igroup"><label>利潤率（%）</label><input type="number" id="q_profit" value="20" step="1" min="0"></div>
+      <div class="igroup"><label>匯率（TWD/USD）</label><input type="number" id="q_fx" value="31.5" step="0.1" min="0.1"></div>
+    </div>
+    <div class="igroup" style="margin-top:10px;"><label>備註</label><textarea id="q_note" placeholder="備註事項..."></textarea></div>
+    <div style="margin-top:14px;">
+      <button class="btn btn-primary" style="padding:10px 28px;font-size:15px;" onclick="calcQuote()">🔄 更新計算</button>
+    </div>
+  </div>
 
-      選擇客戶
-    
-儲存報價 載入零件 清除
-材料成本
-基準 LME（USD/噸）
+  <div class="formula">
+    出廠價 = 材料成本 × (1 + 不良率) + 包裝費 + 人工費率 × 時間<br>
+    報價 = 出廠價 × (1 + 管銷率) × (1 + 利潤率) ÷ 匯率
+  </div>
 
-當前 LME（USD/噸）
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;">
+    <!-- 第一欄：材料成本 -->
+    <div style="background:var(--surface2);border-radius:var(--radius-lg);padding:16px 18px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;">材料成本</div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:0.5px solid var(--border);">
+        <span style="font-size:13px;color:var(--text2);">基準材料成本</span>
+        <span style="font-size:16px;font-weight:500;color:var(--text)" id="r_basemat">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:0.5px solid var(--border);">
+        <span style="font-size:13px;color:var(--text2);">即時材料成本</span>
+        <span style="font-size:16px;font-weight:500;color:var(--text)" id="r_mat">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;">
+        <span style="font-size:13px;color:var(--text2);">變動比例 / 差異</span>
+        <span style="font-size:15px;font-weight:500;" id="r_matdelta">—</span>
+      </div>
+    </div>
 
-資料來源： LME 官網 ・ Trading Economics（即時）
-基準材料成本（元/件）
+    <!-- 第二欄：報價 -->
+    <div style="background:var(--surface2);border-radius:var(--radius-lg);padding:16px 18px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;">報價</div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:0.5px solid var(--border);">
+        <span style="font-size:13px;color:var(--text2);">基準報價</span>
+        <span style="font-size:15px;font-weight:500;color:var(--text);" id="r_basequote">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:0.5px solid var(--border);">
+        <span style="font-size:13px;color:var(--text2);">即時報價</span>
+        <div style="text-align:right;">
+          <div style="font-size:20px;font-weight:700;color:var(--blue);" id="r_twd">—</div>
+          <div style="font-size:13px;color:var(--green);font-weight:500;" id="r_usd">—</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;">
+        <span style="font-size:13px;color:var(--text2);">LME 漲跌幅</span>
+        <span style="font-size:15px;font-weight:500;" id="r_lmepct">—</span>
+      </div>
+    </div>
+  </div>
 
-基準詢價時間
+  <!-- hidden fields for compatibility -->
+  <span id="r_factory" style="display:none"></span>
 
+  <div style="margin-top:8px;">
+    <div class="card-title" style="margin-bottom:10px;">LME 對照表</div>
+    <div class="lme-range no-print" style="margin-bottom:10px;">
+      <label>LME 起始</label>
+      <input type="number" id="lt_min" value="9000" step="500" oninput="renderLmeTable()">
+      <label>結束</label>
+      <input type="number" id="lt_max" value="15000" step="500" oninput="renderLmeTable()">
+      <button class="btn btn-sm" onclick="window.print()">列印</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>LME（USD/噸）</th><th>漲跌幅</th>
+          <th style="text-align:right">材料成本</th>
+          <th style="text-align:right">出廠價</th>
+          <th style="text-align:right">報價（TWD）</th>
+          <th style="text-align:right">報價（USD）</th>
+          <th style="text-align:right">vs 基準TWD</th>
+        </tr></thead>
+        <tbody id="lt_tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-（最後交易價）
-銅件佔材料成本（%）
+<!-- ════════ 報價歷史 ════════ -->
+<div id="page-history" class="page">
+  <div class="page-header">
+    <div class="page-title">報價歷史</div>
+    <div class="page-sub">所有已儲存的報價紀錄</div>
+  </div>
+  <div class="search-row no-print">
+    <input class="search-box" id="h_search" placeholder="搜尋零件名稱、客戶、料號..." oninput="filterHistory()">
+    <select id="h_customer" style="padding:8px 12px;font-size:13px;font-family:inherit;border:0.5px solid var(--border2);border-radius:8px;background:var(--surface);color:var(--text);outline:none;" onchange="filterHistory()">
+      <option value="">全部客戶</option>
+    </select>
+    <button class="btn btn-sm" onclick="loadHistory()">重新整理</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>日期</th><th>零件名稱</th><th>料號</th><th>客戶</th>
+        <th style="text-align:right">當前LME</th>
+        <th style="text-align:right">報價TWD</th>
+        <th style="text-align:right">報價USD</th>
+        <th>操作</th>
+      </tr></thead>
+      <tbody id="h_tbody"></tbody>
+    </table>
+  </div>
+</div>
 
-製造成本
-不良率（%）
+<!-- ════════ 客戶管理 ════════ -->
+<div id="page-customers" class="page">
+  <div class="page-header">
+    <div class="page-title">客戶管理</div>
+    <div class="page-sub">管理客戶基本資料</div>
+  </div>
+  <div class="btn-row no-print">
+    <button class="btn btn-primary" onclick="openModal('modal-addcustomer')">新增客戶</button>
+    <button class="btn btn-sm" onclick="loadCustomers()">重新整理</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>客戶名稱</th><th>聯絡人</th><th>電話</th><th>Email</th><th>幣別</th><th>操作</th></tr></thead>
+      <tbody id="c_tbody"></tbody>
+    </table>
+  </div>
+</div>
 
-額外包裝費（元/件）
+<!-- ════════ 零件主檔 ════════ -->
+<div id="page-parts" class="page">
+  <div class="page-header">
+    <div class="page-title">零件主檔</div>
+    <div class="page-sub">儲存常用零件的基準參數，報價時可快速載入</div>
+  </div>
+  <div class="btn-row no-print">
+    <button class="btn btn-primary" onclick="openModal('modal-addpart')">新增零件</button>
+    <button class="btn btn-sm" onclick="loadParts()">重新整理</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>料號</th><th>零件名稱</th><th>材質</th>
+        <th style="text-align:right">基準LME</th>
+        <th style="text-align:right">基準材料成本</th>
+        <th style="text-align:right">銅件佔比</th>
+        <th>操作</th>
+      </tr></thead>
+      <tbody id="p_tbody"></tbody>
+    </table>
+  </div>
+</div>
 
-人工費率（元/分鐘）
+<!-- ════════ 設定 ════════ -->
+<div id="page-settings" class="page">
+  <div class="page-header">
+    <div class="page-title">設定</div>
+    <div class="page-sub">連線設定與系統初始化</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Google Apps Script API 網址</div>
+    <div class="igroup" style="margin-bottom:12px;">
+      <label>部署網址（貼上你的 Web App URL）</label>
+      <input type="text" id="s_apiUrl" placeholder="https://script.google.com/macros/s/...../exec" style="font-family:'JetBrains Mono';font-size:12px;">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveApiUrl()">儲存網址</button>
+      <button class="btn" onclick="testApi()">測試連線</button>
+      <button class="btn btn-green" onclick="initSheets()">初始化工作表</button>
+    </div>
+    <div id="s_result" style="font-size:13px;color:var(--text2);margin-top:8px;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">預設報價參數</div>
+    <div class="grid3">
+      <div class="igroup"><label>管銷率（%）</label><input type="number" id="def_overhead" value="15" step="1" min="0"></div>
+      <div class="igroup"><label>利潤率（%）</label><input type="number" id="def_profit" value="20" step="1" min="0"></div>
+      <div class="igroup"><label>匯率（TWD/USD）</label><input type="number" id="def_fx" value="31.5" step="0.1" min="0.1"></div>
+      <div class="igroup"><label>人工費率（元/分鐘）</label><input type="number" id="def_labor" value="3" step="0.1" min="0"></div>
+      <div class="igroup"><label>不良率（%）</label><input type="number" id="def_defect" value="2" step="0.1" min="0"></div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:12px;" onclick="saveDefaults()">儲存預設值</button>
+  </div>
+  <div class="card">
+    <div class="card-title">部署說明</div>
+    <ol style="font-size:13px;color:var(--text2);line-height:2;padding-left:20px;">
+      <li>開啟你的 Google Sheets，點上方選單「擴充功能」→「Apps Script」</li>
+      <li>刪除預設內容，貼上 <strong>apps_script.gs</strong> 的程式碼</li>
+      <li>點「部署」→「新增部署」→ 類型選「網頁應用程式」</li>
+      <li>執行身份選「我」，存取權選「任何人」，點「部署」</li>
+      <li>複製產生的網址，貼到上方「API 網址」欄位，儲存後測試連線</li>
+      <li>確認連線成功後，點「初始化工作表」建立三張工作表</li>
+    </ol>
+  </div>
+</div>
 
-加工時間（分鐘）
+</main>
+</div>
 
-報價參數
-管銷率（%）
+<!-- ════ MODALS ════ -->
+<div class="modal-bg" id="modal-addcustomer">
+  <div class="modal">
+    <div class="modal-title" id="modal-customer-title">新增客戶</div>
+    <div class="grid2" style="gap:12px;">
+      <div class="igroup"><label>客戶名稱 *</label><input type="text" id="c_name" placeholder="公司名稱"></div>
+      <div class="igroup"><label>聯絡人</label><input type="text" id="c_contact" placeholder="姓名"></div>
+      <div class="igroup"><label>電話</label><input type="text" id="c_phone" placeholder="04-xxxxxxxx"></div>
+      <div class="igroup"><label>Email</label><input type="email" id="c_email" placeholder="xxx@example.com"></div>
+      <div class="igroup"><label>幣別</label>
+        <select id="c_currency">
+          <option value="TWD">TWD 台幣</option>
+          <option value="USD">USD 美元</option>
+          <option value="JPY">JPY 日圓</option>
+          <option value="EUR">EUR 歐元</option>
+        </select>
+      </div>
+    </div>
+    <div class="igroup" style="margin-top:10px;"><label>地址</label><input type="text" id="c_address" placeholder="公司地址"></div>
+    <div class="igroup" style="margin-top:10px;"><label>備註</label><textarea id="c_note" placeholder="備註..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-addcustomer');resetCustomerModal()">取消</button>
+      <button class="btn btn-primary" id="btn-save-customer" onclick="addCustomer()">儲存客戶</button>
+    </div>
+  </div>
+</div>
 
-利潤率（%）
+<div class="modal-bg" id="modal-addpart">
+  <div class="modal">
+    <div class="modal-title">新增零件主檔</div>
+    <div class="grid2" style="gap:12px;">
+      <div class="igroup"><label>零件名稱 *</label><input type="text" id="ap_name" placeholder="零件名稱"></div>
+      <div class="igroup"><label>料號</label><input type="text" id="ap_no" placeholder="料號（選填）"></div>
+      <div class="igroup"><label>材質</label><input type="text" id="ap_mat" value="C3771" placeholder="C3771"></div>
+      <div class="igroup"><label>基準 LME（USD/噸）</label><input type="number" id="ap_baseLME" value="9500" step="100"></div>
+      <div class="igroup"><label>基準材料成本（元/件）</label><input type="number" id="ap_baseMat" value="500" step="1"></div>
+      <div class="igroup"><label>銅件佔比（%）</label><input type="number" id="ap_copperPct" value="40" step="1"></div>
+      <div class="igroup"><label>不良率（%）</label><input type="number" id="ap_defect" value="2" step="0.1"></div>
+      <div class="igroup"><label>包裝費（元/件）</label><input type="number" id="ap_pkg" value="0" step="1"></div>
+      <div class="igroup"><label>人工費率（元/分）</label><input type="number" id="ap_labor" value="3" step="0.1"></div>
+      <div class="igroup"><label>加工時間（分）</label><input type="number" id="ap_time" value="5" step="0.1"></div>
+    </div>
+    <div class="igroup" style="margin-top:10px;"><label>備註</label><textarea id="ap_note" placeholder="備註..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-addpart')">取消</button>
+      <button class="btn btn-primary" onclick="addPart()">儲存零件</button>
+    </div>
+  </div>
+</div>
 
-匯率（TWD/USD）
+<div class="modal-bg" id="modal-loadpart">
+  <div class="modal">
+    <div class="modal-title">載入零件主檔</div>
+    <input class="search-box" style="width:100%;margin-bottom:12px;" id="lp_search" placeholder="搜尋零件名稱或料號..." oninput="filterPartModal()">
+    <div id="lp_list" style="max-height:360px;overflow-y:auto;"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-loadpart')">取消</button>
+    </div>
+  </div>
+</div>
 
-備註
-🔄 更新計算
-出廠價 = 材料成本 × (1 + 不良率) + 包裝費 + 人工費率 × 時間
-報價 = 出廠價 × (1 + 管銷率) × (1 + 利潤率) ÷ 匯率
-材料成本
-基準材料成本
-—
-即時材料成本
-—
-變動比例 / 差異
-—
-報價
-基準報價
-—
-即時報價
-—
-—
-LME 漲跌幅
-—
-LME 對照表
-LME 起始
+<div class="modal-bg" id="modal-detail">
+  <div class="modal" style="width:640px;">
+    <div class="modal-title" id="md_title">報價詳情</div>
+    <div id="md_body"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-detail')">關閉</button>
+      <button class="btn btn-primary" onclick="loadToQuote()">載入報價</button>
+      <button class="btn" onclick="printDetail()">列印 / PDF</button>
+    </div>
+  </div>
+</div>
 
-結束
+<div class="modal-bg" id="modal-addtoparts">
+  <div class="modal" style="width:480px;">
+    <div class="modal-title">新增到零件主檔？</div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:16px;line-height:1.8;">
+      此零件尚未在零件主檔中建立：<br>
+      <strong id="atp_name" style="color:var(--text);"></strong>
+      <span id="atp_partno" style="font-size:12px;color:var(--text3);margin-left:8px;"></span>
+    </div>
+    <div style="background:var(--surface2);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--text2);margin-bottom:16px;">
+      目前報價的基準參數將自動帶入，你可以直接確認或修改後新增。
+    </div>
+    <div class="grid2" style="gap:10px;margin-bottom:10px;">
+      <div class="igroup"><label>材質</label><input type="text" id="pt_mat" value="C3771"></div>
+      <div class="igroup"><label>基準 LME（USD/噸）</label><input type="number" id="pt_baseLME" value="9500" step="100"></div>
+      <div class="igroup"><label>基準材料成本（元/件）</label><input type="number" id="pt_baseMat" value="500" step="1"></div>
+      <div class="igroup"><label>銅件佔比（%）</label><input type="number" id="pt_copperPct" value="40" step="1"></div>
+      <div class="igroup"><label>不良率（%）</label><input type="number" id="pt_defect" value="2" step="0.1"></div>
+      <div class="igroup"><label>包裝費（元/件）</label><input type="number" id="pt_pkg" value="0" step="1"></div>
+      <div class="igroup"><label>人工費率（元/分）</label><input type="number" id="pt_labor" value="3" step="0.1"></div>
+      <div class="igroup"><label>加工時間（分）</label><input type="number" id="pt_time" value="5" step="0.1"></div>
+    </div>
+    <div class="igroup" style="margin-bottom:4px;"><label>備註</label><textarea id="pt_note" placeholder="備註..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-addtoparts')">略過</button>
+      <button class="btn btn-primary" onclick="addPartFromQuote()">新增到零件主檔</button>
+    </div>
+  </div>
+</div>
 
-列印
-LME（USD/噸）
-漲跌幅
-材料成本
-出廠價
-報價（TWD）
-報價（USD）
-vs 基準TWD
+<div id="toast"></div>
 
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let API_URL = localStorage.getItem('lme_api_url') || '';
+let customers = [];
+let parts = [];
+let historyData = [];
+let currentDetail = null;
+let defaults = JSON.parse(localStorage.getItem('lme_defaults') || '{}');
 
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function fmtDate(d) {
+  if (!d) return '—';
+  const s = String(d);
+  return s.replace('T', ' ').slice(0, 16);
+}
+function fmt(n, d=1) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return parseFloat(Number(n).toFixed(d)).toLocaleString('zh-TW', {minimumFractionDigits:d, maximumFractionDigits:d});
+}
+function toast(msg, dur=2500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+function go(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const pages = ['quote','history','customers','parts','settings'];
+  document.querySelectorAll('.nav-item')[pages.indexOf(page)]?.classList.add('active');
+  if (page === 'history') loadHistory();
+  if (page === 'customers') loadCustomers();
+  if (page === 'parts') loadParts();
+  if (page === 'lmetable') renderLmeTable();
+  if (page === 'settings') document.getElementById('s_apiUrl').value = API_URL;
+}
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bg').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ══════════════════════════════════════════
+// API
+// ══════════════════════════════════════════
+async function apiGet(params) {
+  if (!API_URL) { toast('請先在「設定」頁填入 API 網址'); return null; }
+  const url = API_URL + '?' + new URLSearchParams(params);
+  try {
+    const res = await fetch(url);
+    return await res.json();
+  } catch(e) { toast('API 連線失敗：' + e.message); return null; }
+}
+async function apiPost(body) {
+  if (!API_URL) { toast('請先在「設定」頁填入 API 網址'); return null; }
+  try {
+    // Use GET with encoded data to avoid CORS preflight issues
+    const encoded = encodeURIComponent(JSON.stringify(body));
+    const url = API_URL + '?postData=' + encoded + '&action=' + body.action;
+    const res = await fetch(url);
+    return await res.json();
+  } catch(e) { toast('API 連線失敗：' + e.message); return null; }
+}
+function setApiStatus(ok) {
+  document.getElementById('apiDot').className = 'dot ' + (ok ? 'ok' : 'err');
+  document.getElementById('apiStatusText').textContent = ok ? '已連線' : '未連線';
+}
+
+// ══════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════
+function saveApiUrl() {
+  API_URL = document.getElementById('s_apiUrl').value.trim();
+  localStorage.setItem('lme_api_url', API_URL);
+  toast('API 網址已儲存');
+}
+async function testApi() {
+  const r = await apiGet({ action: 'getCustomers' });
+  if (r && r.status === 'ok') {
+    setApiStatus(true);
+    document.getElementById('s_result').textContent = '連線成功！取得 ' + r.data.length + ' 筆客戶資料。';
+    toast('連線成功');
+  } else {
+    setApiStatus(false);
+    document.getElementById('s_result').textContent = '連線失敗，請確認網址與權限設定。';
+  }
+}
+async function initSheets() {
+  const r = await apiGet({ action: 'init' });
+  if (r && r.status === 'ok') {
+    toast('工作表初始化完成！');
+    document.getElementById('s_result').textContent = r.message;
+  }
+}
+function saveDefaults() {
+  defaults = {
+    overhead: document.getElementById('def_overhead').value,
+    profit:   document.getElementById('def_profit').value,
+    fx:       document.getElementById('def_fx').value,
+    labor:    document.getElementById('def_labor').value,
+    defect:   document.getElementById('def_defect').value,
+  };
+  localStorage.setItem('lme_defaults', JSON.stringify(defaults));
+  applyDefaults();
+  toast('預設值已儲存');
+}
+function applyDefaults() {
+  if (defaults.overhead) document.getElementById('q_overhead').value = defaults.overhead;
+  if (defaults.profit)   document.getElementById('q_profit').value   = defaults.profit;
+  if (defaults.fx)       document.getElementById('q_fx').value       = defaults.fx;
+  if (defaults.labor)    document.getElementById('q_labor').value     = defaults.labor;
+  if (defaults.defect)   document.getElementById('q_defect').value    = defaults.defect;
+}
+
+// ══════════════════════════════════════════
+// QUOTE CALCULATION
+// ══════════════════════════════════════════
+function getQuoteParams() {
+  return {
+    baseLME:    parseFloat(document.getElementById('q_baseLME').value)   || 9500,
+    curLME:     parseFloat(document.getElementById('q_curLME').value)     || 12880,
+    baseMat:    parseFloat(document.getElementById('q_baseMat').value)    || 500,
+    baseYear:   document.getElementById('q_baseYear').value  || '',
+    baseMonth:  document.getElementById('q_baseMonth').value || '',
+    copperPct:  (parseFloat(document.getElementById('q_copperPct').value) || 40) / 100,
+    defect:     (parseFloat(document.getElementById('q_defect').value)    || 0) / 100,
+    pkg:        parseFloat(document.getElementById('q_pkg').value)        || 0,
+    labor:      parseFloat(document.getElementById('q_labor').value)      || 3,
+    time:       parseFloat(document.getElementById('q_time').value)       || 5,
+    overhead:   (parseFloat(document.getElementById('q_overhead').value)  || 15) / 100,
+    profit:     (parseFloat(document.getElementById('q_profit').value)    || 20) / 100,
+    fx:         parseFloat(document.getElementById('q_fx').value)         || 31.5,
+  };
+}
+function compute(p, lme) {
+  const ratio = lme / p.baseLME;
+  const mat = p.baseMat * (p.copperPct * ratio + (1 - p.copperPct));
+  const factory = mat * (1 + p.defect) + p.pkg + p.labor * p.time;
+  const twdQ = factory * (1 + p.overhead) * (1 + p.profit);
+  const usdQ = twdQ / p.fx;
+  return { mat, factory, twdQ, usdQ };
+}
+function calcQuote() {
+  const p = getQuoteParams();
+  const cur = compute(p, p.curLME);
+  const lmePct = (p.curLME - p.baseLME) / p.baseLME * 100;
+  const base = compute(p, p.baseLME);
+
+  // 第一欄：材料成本
+  document.getElementById('r_basemat').textContent = fmt(p.baseMat) + ' 元';
+  document.getElementById('r_mat').textContent     = fmt(cur.mat) + ' 元';
+
+  const matDeltaPct = (cur.mat - p.baseMat) / p.baseMat * 100;
+  const matDelta = cur.mat - p.baseMat;
+  const md = document.getElementById('r_matdelta');
+  const matSign = matDelta >= 0 ? '+' : '';
+  md.textContent = `${matSign}${matDeltaPct.toFixed(1)}%  /  ${matSign}${fmt(matDelta)} 元`;
+  md.style.color = matDelta > 0.05 ? 'var(--red)' : matDelta < -0.05 ? 'var(--green)' : 'var(--text3)';
+
+  // 第二欄：報價
+  document.getElementById('r_basequote').textContent = fmt(base.twdQ) + ' NT$  /  ' + fmt(base.usdQ, 3) + ' USD';
+  document.getElementById('r_twd').textContent = fmt(cur.twdQ) + ' NT$';
+  document.getElementById('r_usd').textContent = fmt(cur.usdQ, 3) + ' USD';
+
+  const lp = document.getElementById('r_lmepct');
+  lp.textContent = (lmePct >= 0 ? '+' : '') + lmePct.toFixed(1) + '%';
+  lp.style.color = lmePct > 0.05 ? 'var(--red)' : lmePct < -0.05 ? 'var(--green)' : 'var(--text3)';
+
+  renderLmeTable();
+}
+  const md = document.getElementById('r_matdelta');
+  const matSign = matDelta >= 0 ? '+' : '';
+  md.textContent = `${matSign}${matDeltaPct.toFixed(1)}%  /  ${matSign}${fmt(matDelta)} 元`;
+  md.style.color = matDelta > 0.05 ? 'var(--red)' : matDelta < -0.05 ? 'var(--green)' : 'var(--text3)';
+
+  // 第二欄：報價
+  document.getElementById('r_basequote').textContent = fmt(base.twdQ) + ' NT$  /  ' + fmt(base.usdQ, 3) + ' USD';
+  document.getElementById('r_twd').textContent = fmt(cur.twdQ) + ' NT$';
+  document.getElementById('r_usd').textContent = fmt(cur.usdQ, 3) + ' USD';
+
+  const lp = document.getElementById('r_lmepct');
+  lp.textContent = (lmePct >= 0 ? '+' : '') + lmePct.toFixed(1) + '%';
+  lp.style.color = lmePct > 0.05 ? 'var(--red)' : lmePct < -0.05 ? 'var(--green)' : 'var(--text3)';
+
+  renderLmeTable();
+}
+async function saveQuote() {
+  const name = document.getElementById('q_name').value.trim();
+  if (!name) { toast('請填寫零件名稱'); return; }
+  const p = getQuoteParams();
+  const cur = compute(p, p.curLME);
+  const customerEl = document.getElementById('q_customer');
+  const partNo = document.getElementById('q_partno').value.trim();
+  const data = {
+    customerName: customerEl.options[customerEl.selectedIndex]?.text || '',
+    partName: name,
+    partNo: partNo,
+    baseLME: p.baseLME, curLME: p.curLME, baseMat: p.baseMat,
+    copperPct: Math.round(p.copperPct * 100),
+    defect: Math.round(p.defect * 100 * 10) / 10,
+    pkg: p.pkg, labor: p.labor, time: p.time,
+    overhead: Math.round(p.overhead * 100),
+    profit: Math.round(p.profit * 100),
+    fx: p.fx,
+    matCost: parseFloat(cur.mat.toFixed(2)),
+    factoryPrice: parseFloat(cur.factory.toFixed(2)),
+    twdQuote: parseFloat(cur.twdQ.toFixed(2)),
+    usdQuote: parseFloat(cur.usdQ.toFixed(4)),
+    note: [
+      (p.baseYear && p.baseMonth ? `基準詢價時間：${p.baseYear}年${p.baseMonth}月` : ''),
+      document.getElementById('q_note').value.trim()
+    ].filter(Boolean).join(' ／ ')
+  };
+  const r = await apiPost({ action: 'saveQuote', data });
+  if (r && r.status === 'ok') {
+    toast('報價已儲存！');
+    // 檢查零件主檔是否已存在
+    const exists = parts.some(pt =>
+      (partNo && pt.partNo === partNo) || pt.name === name
+    );
+    if (!exists) {
+      openAddToPartsModal(name, partNo, p);
+    }
+  }
+}
+
+function openAddToPartsModal(name, partNo, p) {
+  document.getElementById('atp_name').textContent = name;
+  document.getElementById('atp_partno').textContent = partNo || '（未填料號）';
+  // 預填資料
+  document.getElementById('pt_name').value     = name;
+  document.getElementById('pt_no').value       = partNo;
+  document.getElementById('pt_mat').value      = 'C3771';
+  document.getElementById('pt_baseLME').value  = p.baseLME;
+  document.getElementById('pt_baseMat').value  = p.baseMat;
+  document.getElementById('pt_copperPct').value= Math.round(p.copperPct * 100);
+  document.getElementById('pt_defect').value   = Math.round(p.defect * 100 * 10) / 10;
+  document.getElementById('pt_pkg').value      = p.pkg;
+  document.getElementById('pt_labor').value    = p.labor;
+  document.getElementById('pt_time').value     = p.time;
+  openModal('modal-addtoparts');
+}
+function clearQuoteForm() {
+  document.getElementById('q_name').value = '';
+  document.getElementById('q_partno').value = '';
+  document.getElementById('q_customer').selectedIndex = 0;
+  document.getElementById('q_note').value = '';
+  applyDefaults();
+  calcQuote();
+}
+
+// ══════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════
+async function loadHistory() {
+  const r = await apiGet({ action: 'getQuotes' });
+  if (!r) return;
+  historyData = r.data || [];
+  renderHistory(historyData);
+}
+function filterHistory() {
+  const kw = document.getElementById('h_search').value.toLowerCase();
+  const cust = document.getElementById('h_customer').value;
+  let data = historyData;
+  if (kw) data = data.filter(r =>
+    String(r.partName).toLowerCase().includes(kw) ||
+    String(r.customerName).toLowerCase().includes(kw) ||
+    String(r.partNo).toLowerCase().includes(kw)
+  );
+  if (cust) data = data.filter(r => r.customerName === cust);
+  renderHistory(data);
+}
+function renderHistory(data) {
+  const tbody = document.getElementById('h_tbody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">尚無報價紀錄</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td>${fmtDate(r.date)}</td>
+      <td>${r.partName}</td>
+      <td><span class="badge badge-blue">${r.partNo || '—'}</span></td>
+      <td>${r.customerName || '—'}</td>
+      <td class="num">$${Number(r.curLME).toLocaleString()}</td>
+      <td class="num">${fmt(r.twdQuote)}</td>
+      <td class="num">${fmt(r.usdQuote, 3)}</td>
+      <td>
+        <button class="btn btn-sm" onclick="showDetail('${r.id}')">詳情</button>
+        <button class="btn btn-sm btn-danger" onclick="delQuote('${r.id}')">刪除</button>
+      </td>
+    </tr>`).join('');
+}
+async function delQuote(id) {
+  if (!confirm('確認刪除此報價？')) return;
+  const r = await apiGet({ action: 'deleteQuote', quoteId: id });
+  if (r && r.status === 'ok') { toast('已刪除'); loadHistory(); }
+}
+function showDetail(id) {
+  const q = historyData.find(x => x.id === id);
+  if (!q) return;
+  currentDetail = q;
+  document.getElementById('md_title').textContent = q.partName;
+  document.getElementById('md_body').innerHTML = `
+    <div class="grid2" style="gap:10px;margin-bottom:14px;">
+      <div class="metric"><div class="metric-label">報價日期</div><div class="metric-value" style="font-size:15px">${fmtDate(q.date)}</div></div>
+      <div class="metric"><div class="metric-label">客戶</div><div class="metric-value" style="font-size:15px">${q.customerName || '—'}</div></div>
+    </div>
+    <div class="grid4" style="gap:8px;margin-bottom:14px;">
+      <div class="metric"><div class="metric-label">材料成本</div><div class="metric-value" style="font-size:16px">${fmt(q.matCost)}</div><div class="metric-sub">元</div></div>
+      <div class="metric"><div class="metric-label">出廠價</div><div class="metric-value" style="font-size:16px">${fmt(q.factoryPrice)}</div><div class="metric-sub">元</div></div>
+      <div class="metric"><div class="metric-label">報價（TWD）</div><div class="metric-value blue" style="font-size:18px">${fmt(q.twdQuote)}</div><div class="metric-sub">元</div></div>
+      <div class="metric"><div class="metric-label">報價（USD）</div><div class="metric-value green" style="font-size:18px">${fmt(q.usdQuote,3)}</div><div class="metric-sub">USD</div></div>
+    </div>
+    <div class="formula">
+      基準LME: <strong>$${Number(q.baseLME).toLocaleString()}</strong> ／
+      當前LME: <strong>$${Number(q.curLME).toLocaleString()}</strong> ／
+      料號: <strong>${q.partNo || '—'}</strong><br>
+      銅件佔比: <strong>${q.copperPct}%</strong> ／
+      不良率: <strong>${q.defect}%</strong> ／
+      人工費率: <strong>${q.labor}元/分 × ${q.time}分</strong><br>
+      管銷率: <strong>${q.overhead}%</strong> ／
+      利潤率: <strong>${q.profit}%</strong> ／
+      匯率: <strong>${q.fx}</strong>
+    </div>
+    ${q.note ? `<div style="font-size:13px;color:var(--text2);margin-top:8px;">備註：${q.note}</div>` : ''}
+  `;
+  openModal('modal-detail');
+}
+function loadToQuote() {
+  if (!currentDetail) return;
+  const q = currentDetail;
+  document.getElementById('q_name').value      = q.partName;
+  document.getElementById('q_partno').value    = q.partNo || '';
+  document.getElementById('q_baseLME').value   = q.baseLME;
+  document.getElementById('q_curLME').value    = q.curLME;
+  document.getElementById('q_baseMat').value   = q.baseMat;
+  document.getElementById('q_copperPct').value = q.copperPct;
+  document.getElementById('q_defect').value    = q.defect;
+  document.getElementById('q_pkg').value       = q.pkg;
+  document.getElementById('q_labor').value     = q.labor;
+  document.getElementById('q_time').value      = q.time;
+  document.getElementById('q_overhead').value  = q.overhead;
+  document.getElementById('q_profit').value    = q.profit;
+  document.getElementById('q_fx').value        = q.fx;
+  document.getElementById('q_note').value      = q.note || '';
+  calcQuote();
+  closeModal('modal-detail');
+  go('quote');
+  toast('已載入報價參數');
+}
+function printDetail() { window.print(); }
+
+// ══════════════════════════════════════════
+// CUSTOMERS
+// ══════════════════════════════════════════
+async function loadCustomers() {
+  const r = await apiGet({ action: 'getCustomers' });
+  if (!r) return;
+  customers = r.data || [];
+  renderCustomers();
+  populateCustomerSelects();
+}
+function renderCustomers() {
+  const tbody = document.getElementById('c_tbody');
+  if (!customers.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">👥</div><div class="empty-text">尚無客戶資料</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = customers.map(c => `
+    <tr>
+      <td><strong>${c.name}</strong></td>
+      <td>${c.contact || '—'}</td>
+      <td>${c.phone || '—'}</td>
+      <td>${c.email || '—'}</td>
+      <td><span class="badge badge-amber">${c.currency || 'TWD'}</span></td>
+      <td>
+        <button class="btn btn-sm" onclick="editCustomer('${c.id}')">編輯</button>
+        <button class="btn btn-sm btn-danger" onclick="delCustomer('${c.id}')">刪除</button>
+      </td>
+    </tr>`).join('');
+}
+function populateCustomerSelects() {
+  const opts = '<option value="">選擇客戶</option>' + customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('q_customer').innerHTML = opts;
+  document.getElementById('h_customer').innerHTML = '<option value="">全部客戶</option>' + customers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+}
+async function addCustomer() {
+  const name = document.getElementById('c_name').value.trim();
+  if (!name) { toast('請填寫客戶名稱'); return; }
+  const r = await apiPost({ action: 'saveCustomer', data: {
+    name, contact: document.getElementById('c_contact').value,
+    phone: document.getElementById('c_phone').value,
+    email: document.getElementById('c_email').value,
+    address: document.getElementById('c_address').value,
+    currency: document.getElementById('c_currency').value,
+    note: document.getElementById('c_note').value,
+  }});
+  if (r && r.status === 'ok') {
+    toast('客戶已儲存');
+    closeModal('modal-addcustomer');
+    loadCustomers();
+    ['c_name','c_contact','c_phone','c_email','c_address','c_note'].forEach(id => document.getElementById(id).value = '');
+  }
+}
+async function addPartFromQuote() {
+  const name = document.getElementById('atp_name').textContent;
+  const partNo = document.getElementById('q_partno').value.trim();
+  const r = await apiPost({ action: 'savePart', data: {
+    name,
+    partNo: partNo,
+    material: document.getElementById('pt_mat').value,
+    baseLME:   document.getElementById('pt_baseLME').value,
+    baseMat:   document.getElementById('pt_baseMat').value,
+    copperPct: document.getElementById('pt_copperPct').value,
+    defect:    document.getElementById('pt_defect').value,
+    pkg:       document.getElementById('pt_pkg').value,
+    labor:     document.getElementById('pt_labor').value,
+    time:      document.getElementById('pt_time').value,
+    note:      document.getElementById('pt_note').value,
+  }});
+  if (r && r.status === 'ok') {
+    toast('已新增到零件主檔！');
+    closeModal('modal-addtoparts');
+    loadParts();
+  }
+}
+async function delCustomer(id) {
+  if (!confirm('確認刪除此客戶？')) return;
+  const r = await apiGet({ action: 'deleteCustomer', customerId: id });
+  if (r && r.status === 'ok') { toast('已刪除'); loadCustomers(); }
+}
+
+function editCustomer(id) {
+  const c = customers.find(x => x.id === id);
+  if (!c) return;
+  // 填入現有資料
+  document.getElementById('c_name').value    = c.name || '';
+  document.getElementById('c_contact').value = c.contact || '';
+  document.getElementById('c_phone').value   = c.phone || '';
+  document.getElementById('c_email').value   = c.email || '';
+  document.getElementById('c_address').value = c.address || '';
+  document.getElementById('c_currency').value = c.currency || 'TWD';
+  document.getElementById('c_note').value    = c.note || '';
+  // 切換 modal 標題和按鈕為編輯模式
+  document.getElementById('modal-customer-title').textContent = '編輯客戶';
+  document.getElementById('btn-save-customer').textContent = '更新客戶';
+  document.getElementById('btn-save-customer').onclick = () => updateCustomer(id);
+  openModal('modal-addcustomer');
+}
+
+async function updateCustomer(id) {
+  const name = document.getElementById('c_name').value.trim();
+  if (!name) { toast('請填寫客戶名稱'); return; }
+  const r = await apiPost({ action: 'updateCustomer', data: {
+    id,
+    name, contact: document.getElementById('c_contact').value,
+    phone: document.getElementById('c_phone').value,
+    email: document.getElementById('c_email').value,
+    address: document.getElementById('c_address').value,
+    currency: document.getElementById('c_currency').value,
+    note: document.getElementById('c_note').value,
+  }});
+  if (r && r.status === 'ok') {
+    toast('客戶資料已更新');
+    closeModal('modal-addcustomer');
+    resetCustomerModal();
+    loadCustomers();
+  }
+}
+
+function resetCustomerModal() {
+  document.getElementById('modal-customer-title').textContent = '新增客戶';
+  document.getElementById('btn-save-customer').textContent = '儲存客戶';
+  document.getElementById('btn-save-customer').onclick = addCustomer;
+  ['c_name','c_contact','c_phone','c_email','c_address','c_note'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ══════════════════════════════════════════
+// PARTS
+// ══════════════════════════════════════════
+async function loadParts() {
+  const r = await apiGet({ action: 'getParts' });
+  if (!r) return;
+  parts = r.data || [];
+  renderParts();
+}
+function renderParts() {
+  const tbody = document.getElementById('p_tbody');
+  if (!parts.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">⚙️</div><div class="empty-text">尚無零件主檔</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = parts.map(p => `
+    <tr>
+      <td><span class="badge badge-blue">${p.partNo}</span></td>
+      <td>${p.name}</td>
+      <td>${p.material || '—'}</td>
+      <td class="num">$${Number(p.baseLME).toLocaleString()}</td>
+      <td class="num">${fmt(p.baseMat)}</td>
+      <td class="num">${p.copperPct}%</td>
+      <td>
+        <button class="btn btn-sm" onclick="loadPartToQuote('${p.partNo}')">載入報價</button>
+        <button class="btn btn-sm btn-danger" onclick="delPart('${p.partNo}')">刪除</button>
+      </td>
+    </tr>`).join('');
+}
+async function addPart() {
+  const name = document.getElementById('ap_name').value.trim();
+  if (!name) { toast('請填寫零件名稱'); return; }
+  const r = await apiPost({ action: 'savePart', data: {
+    name, partNo: document.getElementById('ap_no').value.trim(),
+    material: document.getElementById('ap_mat').value,
+    baseLME:   document.getElementById('ap_baseLME').value,
+    baseMat:   document.getElementById('ap_baseMat').value,
+    copperPct: document.getElementById('ap_copperPct').value,
+    defect:    document.getElementById('ap_defect').value,
+    pkg:       document.getElementById('ap_pkg').value,
+    labor:     document.getElementById('ap_labor').value,
+    time:      document.getElementById('ap_time').value,
+    note:      document.getElementById('ap_note').value,
+  }});
+  if (r && r.status === 'ok') {
+    toast('零件已儲存');
+    closeModal('modal-addpart');
+    loadParts();
+  }
+}
+async function delPart(id) {
+  if (!confirm('確認刪除此零件？')) return;
+  const r = await apiGet({ action: 'deletePart', partId: id });
+  if (r && r.status === 'ok') { toast('已刪除'); loadParts(); }
+}
+function loadFromPart() {
+  filterPartModal();
+  openModal('modal-loadpart');
+}
+function filterPartModal() {
+  const kw = document.getElementById('lp_search').value.toLowerCase();
+  const filtered = parts.filter(p =>
+    p.name.toLowerCase().includes(kw) || String(p.partNo).toLowerCase().includes(kw)
+  );
+  const list = document.getElementById('lp_list');
+  if (!filtered.length) { list.innerHTML = '<div class="empty"><div class="empty-text">沒有符合的零件</div></div>'; return; }
+  list.innerHTML = filtered.map(p => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:0.5px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:background 0.1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''" onclick="loadPartToQuote('${p.partNo}');closeModal('modal-loadpart')">
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:500;">${p.name}</div>
+        <div style="font-size:11px;color:var(--text3);">${p.partNo} · ${p.material} · 基準LME $${Number(p.baseLME).toLocaleString()} · 材料 ${fmt(p.baseMat)}元</div>
+      </div>
+      <span class="badge badge-blue">${p.copperPct}% 銅</span>
+    </div>`).join('');
+}
+function loadPartToQuote(partNo) {
+  const p = parts.find(x => x.partNo === partNo);
+  if (!p) return;
+  document.getElementById('q_name').value      = p.name;
+  document.getElementById('q_partno').value    = p.partNo;
+  document.getElementById('q_baseLME').value   = p.baseLME;
+  document.getElementById('q_baseMat').value   = p.baseMat;
+  document.getElementById('q_copperPct').value = p.copperPct;
+  document.getElementById('q_defect').value    = p.defect || 2;
+  document.getElementById('q_pkg').value       = p.pkg || 0;
+  document.getElementById('q_labor').value     = p.labor || 3;
+  document.getElementById('q_time').value      = p.time || 5;
+  calcQuote();
+  go('quote');
+  toast('已載入：' + p.name);
+}
+
+// ══════════════════════════════════════════
+// LME TABLE
+// ══════════════════════════════════════════
+function renderLmeTable() {
+  const p = getQuoteParams();
+  const base = compute(p, p.baseLME);
+  const lmeMin = parseInt(document.getElementById('lt_min').value) || 9000;
+  const lmeMax = parseInt(document.getElementById('lt_max').value) || 15000;
+  const step = 500;
+  const tbody = document.getElementById('lt_tbody');
+  tbody.innerHTML = '';
+  for (let lme = lmeMin; lme <= lmeMax; lme += step) {
+    const r = compute(p, lme);
+    const pct = (lme - p.baseLME) / p.baseLME * 100;
+    const delta = r.twdQ - base.twdQ;
+    const isBase = lme === p.baseLME;
+    const isCur  = lme === Math.round(p.curLME / step) * step && !isBase;
+    const tr = document.createElement('tr');
+    if (isBase) tr.className = 'base-row';
+    const pcls = !isBase ? (pct > 0 ? 'up' : 'dn') : '';
+    const dcls = !isBase ? (delta > 0 ? 'up' : 'dn') : '';
+    tr.innerHTML = `
+      <td><strong>$${lme.toLocaleString()}</strong>${isBase?' <span class="badge badge-blue">基準</span>':''}${isCur?' <span class="badge badge-green">現</span>':''}</td>
+      <td class="${pcls}">${(pct>=0?'+':'')+pct.toFixed(1)}%</td>
+      <td class="num">${fmt(r.mat)}</td>
+      <td class="num">${fmt(r.factory)}</td>
+      <td class="num">${fmt(r.twdQ)}</td>
+      <td class="num">${fmt(r.usdQ,3)}</td>
+      <td class="num ${dcls}">${(delta>=0?'+':'')+fmt(delta)}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+(async function init() {
+  document.getElementById('s_apiUrl').value = API_URL;
+  applyDefaults();
+  calcQuote();
+  if (API_URL) {
+    const r = await apiGet({ action: 'getCustomers' });
+    if (r && r.status === 'ok') {
+      customers = r.data || [];
+      populateCustomerSelects();
+      setApiStatus(true);
+    }
+    const rp = await apiGet({ action: 'getParts' });
+    if (rp && rp.status === 'ok') parts = rp.data || [];
+  }
+})();
+</script>
+</body>
+</html>
