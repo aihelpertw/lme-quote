@@ -221,7 +221,7 @@ tr.base-row td { background: var(--blue-bg); }
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-title">LME 聯動<br>報價系統</div>
-    <div class="logo-sub">v1.6 · LME Linked Quotation</div>
+    <div class="logo-sub">v1.7 · LME Linked Quotation</div>
   </div>
   <nav class="nav">
     <button class="nav-item active" onclick="go('quote')">
@@ -393,6 +393,19 @@ tr.base-row td { background: var(--blue-bg); }
         </tr></thead>
         <tbody id="lt_tbody"></tbody>
       </table>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div class="card-title" style="margin-bottom:10px;">顏色報價對照表（USD）</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">
+        基準色：C／N／T　×1.1：P　×1.15：S　×1.25：Z／B／R／M
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="color_table" style="min-width:600px;">
+          <thead id="color_thead"></thead>
+          <tbody id="color_tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -1202,6 +1215,47 @@ function renderLmeTable() {
       <td class="num ${dcls}">${(delta>=0?'+':'')+fmt(delta)}</td>`;
     tbody.appendChild(tr);
   }
+
+  // 顏色報價矩陣（顏色為列，LME 為欄）
+  const colorGroups = [
+    { label: 'C／N／T', sub: '鉻色／鎳色／拋600', ratio: 1.0 },
+    { label: 'P', sub: '(拋光)清金 ×1.1', ratio: 1.1 },
+    { label: 'S', sub: '清金+透明漆 ×1.15', ratio: 1.15 },
+    { label: 'Z／B／R／M', sub: 'ORB／平光黑／閃古／刷線鎳 ×1.25', ratio: 1.25 },
+  ];
+
+  const lmeSteps = [];
+  for (let lme = lmeMin; lme <= lmeMax; lme += step) lmeSteps.push(lme);
+
+  // 建立標題列（LME 欄）
+  const thead = document.getElementById('color_thead');
+  thead.innerHTML = '<tr><th style="min-width:110px;">顏色群組</th>' +
+    lmeSteps.map(lme => {
+      const isBase = lme === p.baseLME;
+      const isCur  = lme === Math.round(p.curLME / step) * step && !isBase;
+      return `<th style="text-align:right;font-size:11px;white-space:nowrap;">
+        $${lme.toLocaleString()}${isBase ? '<br><span style="color:var(--blue);font-weight:400">基準</span>' : ''}${isCur ? '<br><span style="color:var(--green);font-weight:400">現</span>' : ''}
+      </th>`;
+    }).join('') + '</tr>';
+
+  // 建立顏色列
+  const ctbody = document.getElementById('color_tbody');
+  ctbody.innerHTML = '';
+  colorGroups.forEach(cg => {
+    const tr = document.createElement('tr');
+    const lmeCells = lmeSteps.map(lme => {
+      const r = compute(p, lme);
+      const usd = r.usdQ * cg.ratio;
+      const isBase = lme === p.baseLME;
+      return `<td class="num"${isBase ? ' style="background:var(--blue-bg);font-weight:500;"' : ''}>${fmt(usd, 3)}</td>`;
+    }).join('');
+    tr.innerHTML = `
+      <td style="white-space:nowrap;">
+        <strong>${cg.label}</strong>
+        <div style="font-size:11px;color:var(--text3);">${cg.sub}</div>
+      </td>${lmeCells}`;
+    ctbody.appendChild(tr);
+  });
 }
 
 // ══════════════════════════════════════════
