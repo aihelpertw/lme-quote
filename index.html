@@ -221,7 +221,7 @@ tr.base-row td { background: var(--blue-bg); }
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-title">LME 聯動<br>報價系統</div>
-    <div class="logo-sub">v1.7 · LME Linked Quotation</div>
+    <div class="logo-sub">v1.8 · LME Linked Quotation</div>
   </div>
   <nav class="nav">
     <button class="nav-item active" onclick="go('quote')">
@@ -648,6 +648,11 @@ function fmtDate(d) {
   const s = String(d);
   return s.replace('T', ' ').slice(0, 16);
 }
+function safeNum(val, defaultVal) {
+  // 空白或 NaN 用預設值，填 0 就是 0
+  const n = parseFloat(val);
+  return (val === '' || val === null || val === undefined || isNaN(n)) ? defaultVal : n;
+}
 function fmt(n, d=1) {
   if (n === null || n === undefined || isNaN(n)) return '—';
   return parseFloat(Number(n).toFixed(d)).toLocaleString('zh-TW', {minimumFractionDigits:d, maximumFractionDigits:d});
@@ -758,13 +763,13 @@ function getQuoteParams() {
     baseYear:   document.getElementById('q_baseYear').value  || '',
     baseMonth:  document.getElementById('q_baseMonth').value || '',
     copperPct:  (parseFloat(document.getElementById('q_copperPct').value) || 40) / 100,
-    defect:     (parseFloat(document.getElementById('q_defect').value)    || 0) / 100,
-    pkg:        parseFloat(document.getElementById('q_pkg').value)        || 0,
-    labor:      parseFloat(document.getElementById('q_labor').value)      || 3,
-    time:       parseFloat(document.getElementById('q_time').value)       || 5,
-    overhead:   (parseFloat(document.getElementById('q_overhead').value)  || 15) / 100,
-    profit:     (parseFloat(document.getElementById('q_profit').value)    || 20) / 100,
-    fx:         parseFloat(document.getElementById('q_fx').value)         || 31.5,
+    defect:     (safeNum(document.getElementById('q_defect').value,    0)) / 100,
+    pkg:        safeNum(document.getElementById('q_pkg').value,        0),
+    labor:      safeNum(document.getElementById('q_labor').value,      3),
+    time:       safeNum(document.getElementById('q_time').value,       0),
+    overhead:   (safeNum(document.getElementById('q_overhead').value,  0)) / 100,
+    profit:     (safeNum(document.getElementById('q_profit').value,    0)) / 100,
+    fx:         parseFloat(document.getElementById('q_fx').value)      || 31.5,
   };
 }
 function compute(p, lme) {
