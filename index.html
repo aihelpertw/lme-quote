@@ -221,7 +221,7 @@ tr.base-row td { background: var(--blue-bg); }
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-title">LME 聯動<br>報價系統</div>
-    <div class="logo-sub">v1.8 · LME Linked Quotation</div>
+    <div class="logo-sub">v1.9 · LME Linked Quotation</div>
   </div>
   <nav class="nav">
     <button class="nav-item active" onclick="go('quote')">
@@ -762,7 +762,7 @@ function getQuoteParams() {
     baseMat:    parseFloat(document.getElementById('q_baseMat').value)    || 500,
     baseYear:   document.getElementById('q_baseYear').value  || '',
     baseMonth:  document.getElementById('q_baseMonth').value || '',
-    copperPct:  (parseFloat(document.getElementById('q_copperPct').value) || 40) / 100,
+    copperPct:  (safeNum(document.getElementById('q_copperPct').value, 40)) / 100,
     defect:     (safeNum(document.getElementById('q_defect').value,    0)) / 100,
     pkg:        safeNum(document.getElementById('q_pkg').value,        0),
     labor:      safeNum(document.getElementById('q_labor').value,      3),
